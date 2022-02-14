@@ -8,6 +8,9 @@ WRITE YOUR CODE IN THE RESPECTIVE QUESTION FUNCTION BLOCK
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Linq;
+using System.Text;
 
 namespace ISM6225_Assignment_2_Spring_2022
 {
@@ -30,7 +33,7 @@ namespace ISM6225_Assignment_2_Spring_2022
             string paragraph = "Bob hit a ball, the hit BALL flew far after it was hit.";
             string[] banned = { "hit" };
             string commonWord = MostCommonWord(paragraph, banned);
-            Console.WriteLine("Most frequent word is {0}:", commonWord);
+            Console.WriteLine("Most frequent word is : {0}", commonWord);
             Console.WriteLine();
 
             //Question 3:
@@ -132,7 +135,24 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //Write your Code here.
+                //Iterating through the array by doing look up with mid elemenet.
+                int i = 0, j = nums.Length-1, mid;
+                while (i <= j)
+                {
+                    mid = (i + j) / 2;
+                    //match
+                    if (nums[mid] == target)
+                    {
+                        mid++;
+                        return mid;
+                    }
+                    //right side of the binary tree
+                    else if (target > nums[mid])
+                        i = mid + 1;
+                    //left side of the binary tree
+                    else
+                        j = mid - 1;
+                }
                 return -1;
             }
             catch (Exception)
@@ -163,10 +183,32 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                
-                //write your code here.
+                //exepting the special characters
+                string wordTolower = Regex.Replace(paragraph, @"[^\w\d\s]", "").ToLower();
+                string[] words = wordTolower.Split(" ");
 
-                return "";
+                //dictionary to store the word count
+                SortedDictionary<String, int> wordCount = new SortedDictionary<String, int>();
+                for (int i = 0; i < words.Length; i++)
+                {
+                    if (wordCount.ContainsKey(words[i]))
+                    {
+                        wordCount[words[i]] = wordCount[words[i]] + 1;
+                    }
+                    else
+                    {
+                        wordCount.Add(words[i], 1);
+                    }
+                }
+                //Removing the banned words from dictionary
+                for (int i = 0; i < banned.Length; i++)
+                {
+                    wordCount.Remove(banned[i]);
+                }
+                //Getting the most frequent word
+                var freq_word = wordCount.OrderByDescending(k => k.Value).First();
+
+                return freq_word.Key;
             }
             catch (Exception)
             {
@@ -200,8 +242,26 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //write your code here.
-                return 0;
+                //dictionary to store the digit count
+                SortedDictionary<int, int> numCount = new SortedDictionary<int, int>();
+                for (int i = 0; i < arr.Length; i++)
+                {
+                    if (numCount.ContainsKey(arr[i]))
+                    {
+                        numCount[arr[i]] = numCount[arr[i]] + 1;
+                    }
+                    else
+                    {
+                        numCount.Add(arr[i], 1);
+                    }
+                }
+                //comparing if the digit = digit count
+                foreach (var item in numCount)
+                {
+                    if (item.Key == item.Value)
+                        return item.Value;
+                }
+                return -1;
             }
             catch (Exception)
             {
@@ -217,7 +277,8 @@ namespace ISM6225_Assignment_2_Spring_2022
         You are playing the Bulls and Cows game with your friend.
         You write down a secret number and ask your friend to guess what the number is. When your friend makes a guess, you provide a hint with the following info:
         •	The number of "bulls", which are digits in the guess that are in the correct position.
-        •	The number of "cows", which are digits in the guess that are in your secret number but are located in the wrong position. Specifically, the non-bull digits in the guess that could be rearranged such that they become bulls.
+        •	The number of "cows", which are digits in the guess that are in your secret number but are located in the wrong position. Specifically, 
+        the non-bull digits in the guess that could be rearranged such that they become bulls.
         Given the secret number secret and your friend's guess guess, return the hint for your friend's guess.
         The hint should be formatted as "xAyB", where x is the number of bulls and y is the number of cows. Note that both secret and guess may contain duplicate digits.
  
@@ -235,8 +296,32 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //write your code here.
-                return "";
+                //Dictionary to create the map of secret/guess number
+                Dictionary<char, int> numMap = new Dictionary<char, int>();
+                int i = 0, j = 0;
+                for (int k = 0; k < secret.Length; k++)
+                {
+                    if (secret[k] == guess[k])
+                        i++;
+                    else
+                    {
+                        if (!numMap.ContainsKey(secret[k])) 
+                            numMap.Add(secret[k], 0);
+                        numMap[secret[k]]++;
+                    }
+                }
+                for (int k = 0; k < secret.Length; k++)
+                {
+                    if (secret[k] != guess[k])
+                    {
+                        if (numMap.ContainsKey(guess[k]) && numMap[guess[k]] > 0)
+                        {
+                            numMap[guess[k]]--;
+                            j++;
+                        }
+                    }
+                }
+                return i + "A" + j + "B";
             }
             catch (Exception)
             {
@@ -265,9 +350,29 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //write your code here.
-                
-                return new List<int>() {} ;
+                List<int> res = new List<int>();
+                //dcitionary to store the last occurance of each character in the string
+                Dictionary<char, int> map = new Dictionary<char, int>();
+                for (int i = 0; i < s.Length; i++)
+                {
+                    if (map.ContainsKey(s[i]))
+                        map[s[i]] = i;
+                    else
+                        map.Add(s[i], i);
+                }
+                //getting the count of partitions
+                int c = 0,  end = int.MinValue;
+                for (int i = 0; i < s.Length; i++)
+                {
+                    c++;
+                    end = Math.Max(end, map[s[i]]);
+                    if (i == end)
+                    {
+                        res.Add(c);
+                        c = 0;
+                    }
+                }
+                return res ;
             }
             catch (Exception)
             {
@@ -310,9 +415,21 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //write your code here.
-
-                return new List<int>() { };
+                int row=1, temp, total=0;
+                Char[] sCharArray = s.ToCharArray();
+                //iterating through the given string & associated with, limiting max pixels to 100
+                foreach (char ch in sCharArray)
+                {
+                    temp = widths[ch - 97];
+                    if (total + temp > 100)
+                    {
+                        total = temp;
+                        row++;
+                    }
+                    else
+                        total += temp;
+                }
+                return new List<int>() {row, total };
             }
             catch (Exception)
             {
@@ -349,9 +466,32 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //write your code here.
-
-                return false;
+                //dictionary to store the valid parenthesis
+                var closeToOpen = new Dictionary<char, char>()
+                {
+                    {')','('},
+                    {']','['},
+                    {'}','{'},
+                };
+                //stack to do, push/pop
+                Stack<char> st = new Stack<char>();
+                foreach (char ch in bulls_string10)
+                {
+                    if (ch == ')' || ch == ']' || ch == '}')
+                    {
+                        //if its closed parenthesis, checking if stack is empty & the last element is matching with corresponding parenthesis' open
+                        if (st.Count > 0 && st.Peek() == closeToOpen[ch])
+                            st.Pop();
+                        else
+                            return false;
+                    }
+                    else
+                        st.Push(ch);
+                }
+                if (st.Count != 0)
+                    return false;
+                else
+                    return true;
             }
             catch (Exception)
             {
@@ -392,9 +532,20 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //write your code here.
-
-                return 0;
+                //given morse code
+                string[] morse = new[] { ".-", "-...", "-.-.", "-..", ".", "..-.", "--.", "....", "..", ".---", "-.-", ".-..", "--", "-.", "---", ".--.", "--.-", ".-.", "...", "-", "..-", "...-", ".--", "-..-", "-.--", "--.." };
+                StringBuilder sb = new StringBuilder();
+                //Hasset is used to hold the unique list of elements, in this case, unique transfromation
+                var hashSet = new HashSet<string>();
+                foreach (var word in words)
+                {
+                    foreach(var ch in word)
+                        sb.Append(morse[ch - 'a']);
+                    hashSet.Add(sb.ToString());
+                    sb.Clear();
+                }
+                //returning number of unique transformations
+                return hashSet.Count;
             }
             catch (Exception)
             {
@@ -460,8 +611,32 @@ namespace ISM6225_Assignment_2_Spring_2022
         {
             try
             {
-                //write your code here.
-                return 0;
+                int[,] result = new int[word1.Length+1,word2.Length+1];
+                /*In the given example ==> result[5,3]
+                 * 0 1 2 3
+                 * 1 
+                 * 2
+                 * 3
+                 * 4
+                 * 5     $
+                 * $ ==> required number of operations
+                 */
+                //Below 2 for loops generate above output (except $)
+                for (int i = 0; i < word1.Length; i++)
+                    result[i, 0] = i;
+                for (int i = 1; i < word2.Length; i++)
+                    result[0, i] = i;
+                //Rest of the above matrix will filled by below for loops: if the characters in the word are matching then required number of transformations are available at corresponding result matrix's prevv element. 
+                //Else: assign result[i,j] with least value among left, up, left diagonal 
+                for (int i=1;i<=word1.Length;i++)
+                    for (int j=1;j<=word2.Length;j++)
+                    {
+                        if (word1[i - 1] == word2[j - 1])
+                            result[i, j] = result[i - 1, j - 1];
+                        else
+                            result[i, j] = Math.Min(result[i - 1, j - 1], Math.Min(result[i - 1, j], result[i, j - 1])) + 1;
+                    }
+                return result[word1.Length,word2.Length];
 
             }
             catch (Exception)
